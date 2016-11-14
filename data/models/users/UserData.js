@@ -1,3 +1,4 @@
+//TODO: Refactor the payloads to only have the minimal data
 module.exports = {
     mdUser: {
         "code": "mdUser",
@@ -10,6 +11,7 @@ module.exports = {
         "userCredentials": {
             "code": "mdUser",
             "username": "mdUser",
+            "password":"District1",
             "userInfo": {
                 "id": "zxcvb123456"
             },
@@ -34,6 +36,7 @@ module.exports = {
         "userCredentials": {
             "code": "noMdUser",
             "username": "noMdUser",
+            "password":"District1",
             "userInfo": {
                 "id": "zxcvb133456"
             },
@@ -58,6 +61,7 @@ module.exports = {
         "userCredentials": {
             "code": "godUser",
             "username": "godUser",
+            "password":"District1",
             "userInfo": {
                 "id": "zxcvb434356"
             },
