@@ -5,6 +5,6 @@ module.exports = {
         "httpStatus": "Internal Server Error",
         "httpStatusCode": 500,
         "status": "ERROR",
-        "message": "No metadata versions exist. Please check again later."
+        "message": "No metadata version with name Version_1 exists. Please check again later."
     }
 };
