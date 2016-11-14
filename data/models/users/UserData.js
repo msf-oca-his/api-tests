@@ -1,45 +1,77 @@
- //TODO: Refactor the payloads to only have the minimal data
- module.exports={
-    mdUser :{
-       "firstName": "mdUser",
-       "surname": "mdUser",
-       "email": "",
-        "id":"zxcvb123456",
-       "userCredentials": {
-           "username": "mdUser",
-           "password": "District1",
-           "userRoles": [{
-               "id": "1234567goia"
-           }]
-       }
+module.exports = {
+    mdUser: {
+        "code": "mdUser",
+        "id": "zxcvb123456",
+        "name": "mdUser mdUser",
+        "displayName": "mdUser mdUser",
+        "externalAccess": false,
+        "surname": "mdUser",
+        "firstName": "mdUser",
+        "userCredentials": {
+            "code": "mdUser",
+            "username": "mdUser",
+            "userInfo": {
+                "id": "zxcvb123456"
+            },
+            "user": {
+                "id": "zxcvb123456"
+            },
+            "userRoles": [
+                {
+                    "id": "1234567goia"
+                }
+            ]
+        }
     },
-    noMdUser :{
-       "firstName": "noMdUser",
-       "surname": "noMdUser",
-       "email": "",
-        "id":"zxcvb133456",
-       "userCredentials": {
-           "username": "noMdUser",
-           "password": "District1",
-           "userRoles": [{
-               "id": "4567321poia"
-           }]
-       }
+    noMdUser: {
+        "code": "noMdUser",
+        "id": "zxcvb133456",
+        "name": "noMdUser noMdUser",
+        "displayName": "noMdUser noMdUser",
+        "externalAccess": false,
+        "surname": "noMdUser",
+        "firstName": "noMdUser",
+        "userCredentials": {
+            "code": "noMdUser",
+            "username": "noMdUser",
+            "userInfo": {
+                "id": "zxcvb133456"
+            },
+            "user": {
+                "id": "zxcvb133456"
+            },
+            "userRoles": [
+                {
+                    "id": "4567321poia"
+                }
+            ]
+        }
     },
-    godUser :{
-       "firstName": "godUser",
-       "surname": "godUser",
-       "email": "",
-        "id":"zxcvb434356",
-       "userCredentials": {
-           "username": "godUser",
-           "password": "District1",
-           "userRoles": [{
-               "id": "4567890tyui"
-           }]
-       }
+    godUser: {
+        "code": "godUser",
+        "id": "zxcvb434356",
+        "name": "godUser godUser",
+        "displayName": "godUser godUser",
+        "externalAccess": false,
+        "surname": "godUser",
+        "firstName": "godUser",
+        "userCredentials": {
+            "code": "godUser",
+            "username": "godUser",
+            "userInfo": {
+                "id": "zxcvb434356"
+            },
+            "user": {
+                "id": "zxcvb434356"
+            },
+            "userRoles": [
+                {
+                    "id": "4567890tyui"
+                }
+            ]
+        }
     },
-    mdSyncUserRole :{
+    mdSyncUserRole: {
         "name": "MD sync user",
         "id": "1234567goia",
         "displayName": "MD sync user",
@@ -58,7 +90,7 @@
             "F_METADATA_MANAGE"
         ]
     },
-    superUserRole :{
+    superUserRole: {
         "name": "Super user",
         "id": "4567890tyui",
         "displayName": "Super user",
@@ -77,7 +109,7 @@
             "ALL"
         ]
     },
-    noMdSyncUserRole :{
+    noMdSyncUserRole: {
         "name": "No MD sync user",
         "id": "4567321poia",
         "displayName": "No MD sync user",
