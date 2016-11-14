@@ -12,32 +12,39 @@ var chakram = require('chakram'),
 
 //TODO : Reword the test case description.
 describe("accesing versioning API with different user authorities", function () {
-before("creating user roles with all authority, MD sync authority, No MD sync authority and users for respective authorities ", function () {
-            console.log(" Creating users and user roles");
-            expect(chakram.post(userRolesApiUrl, userData.superUserRole, env.properRequestParams)).to.have.status(200);
-            expect(chakram.post(userRolesApiUrl, userData.noMdSyncUserRole, env.properRequestParams)).to.have.status(200);
-            expect(chakram.post(userRolesApiUrl, userData.mdSyncUserRole, env.properRequestParams)).to.have.status(200);
-            expect(chakram.post(usersApiUrl, userData.godUser, env.properRequestParams)).to.have.status(200);
-            expect(chakram.post(usersApiUrl, userData.mdUser, env.properRequestParams)).to.have.status(200);
-            expect(chakram.post(usersApiUrl, userData.noMdUser, env.properRequestParams)).to.have.status(200);
-            return chakram.wait();
-        });
- after("deleting user roles and users created", function () {
-            expect(chakram.delete(usersApiUrl + userData.godUser.id, {}, env.properRequestParams)).to.have.status(204)
+    before("creating user roles with all authority, MD sync authority, No MD sync authority and users for respective authorities ", function () {
+        console.log(" Creating users and user roles");
+        expect(chakram.post(userRolesApiUrl, userData.superUserRole, env.properRequestParams)).to.have.status(201)
             .then(function () {
-            expect(chakram.delete(userRolesApiUrl + userData.superUserRole.id, {}, env.properRequestParams)).to.have.status(204);
+                expect(chakram.post(usersApiUrl, userData.godUser, env.properRequestParams)).to.have.status(200);
             });
-            expect(chakram.delete(usersApiUrl + userData.mdUser.id, {}, env.properRequestParams)).to.have.status(204)
+        expect(chakram.post(userRolesApiUrl, userData.noMdSyncUserRole, env.properRequestParams)).to.have.status(201)
             .then(function () {
-            expect(chakram.delete(userRolesApiUrl + userData.mdSyncUserRole.id, {}, env.properRequestParams)).to.have.status(204);
+                expect(chakram.post(usersApiUrl, userData.mdUser, env.properRequestParams)).to.have.status(200);
             });
-            expect(chakram.delete(usersApiUrl + userData.noMdUser.id, {}, env.properRequestParams)).to.have.status(204)
+        expect(chakram.post(userRolesApiUrl, userData.mdSyncUserRole, env.properRequestParams)).to.have.status(201)
             .then(function () {
-            expect(chakram.delete(userRolesApiUrl + userData.noMdSyncUserRole.id, {}, env.properRequestParams)).to.have.status(204);
-           });
-return chakram.wait();
+                expect(chakram.post(usersApiUrl, userData.noMdUser, env.properRequestParams)).to.have.status(200);
+            });
+        return chakram.wait();
+    });
+    after("deleting user roles and users created", function () {
+        chakram.startDebug();
+        expect(chakram.delete(usersApiUrl + userData.godUser.id, {}, env.properRequestParams)).to.have.status(204)
+            .then(function () {
+                expect(chakram.delete(userRolesApiUrl + userData.superUserRole.id, env.properRequestParams)).to.have.status(204);
+            });
+        expect(chakram.delete(usersApiUrl + userData.mdUser.id, {}, env.properRequestParams)).to.have.status(204)
+            .then(function () {
+                expect(chakram.delete(userRolesApiUrl + userData.mdSyncUserRole.id, env.properRequestParams)).to.have.status(204);
+            });
+        expect(chakram.delete(usersApiUrl + userData.noMdUser.id, {}, env.properRequestParams)).to.have.status(204)
+            .then(function () {
+                expect(chakram.delete(userRolesApiUrl + userData.noMdSyncUserRole.id, env.properRequestParams)).to.have.status(204);
+            });
+        return chakram.wait();
 
-});
+    });
 
     describe("create version api with different types of users being used for authorization", function () {
         it("should return 403 httpstatus code  when the authorizing user does not have 'metadata handle' or 'all' authority  while trying to create a version", function () {
