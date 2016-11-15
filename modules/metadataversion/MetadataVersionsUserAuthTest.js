@@ -30,17 +30,17 @@ describe("accesing versioning API with different user authorities", function () 
     });
     after("deleting user roles and users created", function () {
         chakram.startDebug();
-        expect(chakram.delete(usersApiUrl + userData.godUser.id, {}, env.properRequestParams)).to.have.status(204)
+        expect(chakram.delete(usersApiUrl + userData.godUser.id, {}, env.properRequestParams)).to.have.status(200)
             .then(function () {
-                expect(chakram.delete(userRolesApiUrl + userData.superUserRole.id, env.properRequestParams)).to.have.status(204);
+                expect(chakram.delete(userRolesApiUrl + userData.superUserRole.id, {}, env.properRequestParams)).to.have.status(200);
             });
-        expect(chakram.delete(usersApiUrl + userData.mdUser.id, {}, env.properRequestParams)).to.have.status(204)
+        expect(chakram.delete(usersApiUrl + userData.mdUser.id, {}, env.properRequestParams)).to.have.status(200)
             .then(function () {
-                expect(chakram.delete(userRolesApiUrl + userData.mdSyncUserRole.id, env.properRequestParams)).to.have.status(204);
+                expect(chakram.delete(userRolesApiUrl + userData.mdSyncUserRole.id,  {}, env.properRequestParams)).to.have.status(200);
             });
-        expect(chakram.delete(usersApiUrl + userData.noMdUser.id, {}, env.properRequestParams)).to.have.status(204)
+        expect(chakram.delete(usersApiUrl + userData.noMdUser.id, {}, env.properRequestParams)).to.have.status(200)
             .then(function () {
-                expect(chakram.delete(userRolesApiUrl + userData.noMdSyncUserRole.id, env.properRequestParams)).to.have.status(204);
+                expect(chakram.delete(userRolesApiUrl + userData.noMdSyncUserRole.id,  {}, env.properRequestParams)).to.have.status(200);
             });
         return chakram.wait();
 
