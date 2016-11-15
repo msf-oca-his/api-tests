@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-node versionContractTests.js
+node ./versionContractTests.js
