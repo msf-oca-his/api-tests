@@ -73,7 +73,7 @@ describe("metadata get version data API", function () {
         it("should get details of the atomic version created", function () {
             setup.then(function () {
                 var response = chakram.get(getVersionDataURL + version1.name + pathData, env.properRequestParams);
-                expect(response).to.have.status(200);
+                expect(response).to.have.status(208);
                 expect(response).to.have.json('dataElements[0].code', dataElementData.dataElements.de_Number_1.code);
                 expect(response).to.have.json('dataElements[0].id', dataElementData.dataElements.de_Number_1.id);
                 expect(response).to.have.json('categoryCombos[0].id', catComboData.emptyCatCombo_1.id);
@@ -85,7 +85,7 @@ describe("metadata get version data API", function () {
         it("should get details of the best_effort version created", function () {
             setup.then(function () {
                 var response = chakram.get(getVersionDataURL + version.name + pathData, env.properRequestParams);
-                expect(response).to.have.status(200);
+                expect(response).to.have.status(208);
                 expect(response).to.have.json('dataElements[0].code', dataElementData.dataElements.de_Number_1.code);
                 expect(response).to.have.json('dataElements[0].id', dataElementData.dataElements.de_Number_1.id);
             });
