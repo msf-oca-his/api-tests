@@ -20,7 +20,6 @@ describe("metadata sync API  when there is no proper authorization", function ()
 
 describe("metadata sync API  when remote server is not configured on local", function () {
     it("should give a 500 error", function () {
-        chakram.startDebug();
         var response = chakram.get(syncMetadataLocalUrl + data.version, env.properRequestParams);
         expect(response).to.have.status(500);
         expect(response).to.have.json(data.remoteServerNotConfigured);
@@ -46,28 +45,35 @@ describe("metadata sync API  when remote server details are incorrect", function
 
 
 describe("metadata sync API  when remote server details are correct", function () {
+    var setup;
     before("setting valid username and password for HQ server details on local", function () {
-        return chakram.post(systemSettingsUrl, data.validServerDetails, env.properRequestParams);
+        setup = chakram.post(systemSettingsUrl, data.validServerDetails, env.properRequestParams);
     });
 
     it("should give a 400 error when version not present", function () {
+        setup.then(function () {
         var response = chakram.get(syncMetadataLocalUrl + data.version, env.properRequestParams);
         expect(response).to.have.status(400);
         expect(response).to.have.json(data.errorData);
         return chakram.wait();
     });
+    });
 
     it("should give a 400 error when wrong parameter is entered", function () {
+        setup.then(function () {
         var response = chakram.get(syncMetadataLocalUrl + "qwerty", env.properRequestParams);
         expect(response).to.have.status(400);
         expect(response).to.have.json(data.errorData);
         return chakram.wait();
     });
+    });
     it("should give a 500 error when a null parameter is passed", function () {
+        setup.then(function () {
         var response = chakram.get(syncMetadataLocalUrl + "", env.properRequestParams);
         expect(response).to.have.status(500);
         expect(response).to.have.json(data.nullparameter);
         return chakram.wait();
+    });
     });
 });
 
