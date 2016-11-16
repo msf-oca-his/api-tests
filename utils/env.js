@@ -2,10 +2,10 @@ var host = process.env.DHIS_HOST;
 var port = process.env.DHIS_PORT;
 
 if (typeof host == 'undefined' || !host) {
-    host = 'localhost'
+    host = '10.136.23.138'
 }
 if (typeof port == 'undefined' || !port) {
-    port = 8085
+    port = 8080
 }
 
 module.exports = { //TODO: this would be more of conf than util.

@@ -16,9 +16,11 @@ describe("get details of the metadata version", function () {
     });
 
     it("should give error status code as 401 when the authorization is invalid", function () {
-        var response = chakram.get(getVersionURL + data.nameVersion1, env.improperRequestParams);
-        expect(response).to.have.status(401);
-        return chakram.wait();
+        chakram.get(getVersionURL + data.nameVersion1, env.improperRequestParams)
+        .then(function (response) {
+            expect(response).to.have.status(401);
+            return chakram.wait();
+        });
     });
 
     describe("when a metadata version exists ", function () {

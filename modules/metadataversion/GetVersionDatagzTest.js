@@ -23,9 +23,11 @@ describe("metadata get version data gz API", function () {
     });
 
     it("when authentication is not proper should give error status code as 401", function () {
-        var response = chakram.get(getVersionDataURL + data.nameVersion1 + pathData, env.improperRequestParams);
-        expect(response).to.have.status(401);
-        return chakram.wait();
+        chakram.get(getVersionDataURL + data.nameVersion1 + pathData, env.improperRequestParams)
+        .then(function (response) {
+            expect(response).to.have.status(401);
+            return chakram.wait();
+        });
     });
 
     describe("when proper metadata versions exists", function () {

@@ -29,7 +29,6 @@ describe("accesing versioning API with different user authorities", function () 
         return chakram.wait();
     });
     after("deleting user roles and users created", function () {
-        chakram.startDebug();
         expect(chakram.delete(usersApiUrl + userData.godUser.id, {}, env.properRequestParams)).to.have.status(200)
             .then(function () {
                 expect(chakram.delete(userRolesApiUrl + userData.superUserRole.id, {}, env.properRequestParams)).to.have.status(200);

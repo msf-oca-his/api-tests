@@ -6,18 +6,19 @@ var chakram = require('chakram'),
 
 describe("metadata create version API", function () {
     it("should fail to create atomic version when there is no proper authorization", function () {
-        var response = chakram.post(createVersionURL + data.typeAtomic, {}, env.improperRequestParams);
-       return  response.then(function (data) {
-            console.log('then here', arguments)
-            return expect(response).to.have.status(401);
-
-        })
-    });
+        chakram.post(createVersionURL + data.typeAtomic, {}, env.improperRequestParams)
+            .then(function (response) {
+                expect(response).to.have.status(401);
+                return chakram.wait();
+            });
+        });
 //TODO: use one more 'descibe' to describe a scenario. 'it' should only have the behavior. extract all whens to descibe.
     it("should fail to create best_effort version when there is no proper authorization", function () {
-        var response = chakram.post(createVersionURL + data.typeBestEffort, {}, env.improperRequestParams);
-        expect(response).to.have.status(401);
-        return chakram.wait();
+        chakram.post(createVersionURL + data.typeBestEffort, {}, env.improperRequestParams)
+        .then(function (response) {
+            expect(response).to.have.status(401);
+            return chakram.wait();
+        });
     });
 
     it("should fail to set up a random version when user tries to create version other than atomic or best_effort", function () {
@@ -46,7 +47,6 @@ describe("metadata create version API", function () {
             });
         return chakram.wait();
     });
-})
-;
+});
 
 

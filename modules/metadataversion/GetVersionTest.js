@@ -17,9 +17,11 @@ describe("metadata get version API", function () {
     });
 
     it("when authentication is not proper should give error status code as 401", function () {
-        var response = chakram.get(versionURL, env.improperRequestParams);
-        expect(response).to.have.status(401);
-        return chakram.wait();
+        chakram.get(versionURL, env.improperRequestParams)
+        .then(function (response) {
+            expect(response).to.have.status(401);
+            return chakram.wait();
+        });
     });
 
     describe("when proper version exists", function () {
