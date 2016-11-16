@@ -10,14 +10,17 @@ var chakram = require('chakram'),
 
 describe("metadata sync API  when there is no proper authorization", function () {
     it("should give 401 error", function () {
-        var response = chakram.get(syncMetadataLocalUrl + data.version, env.improperRequestParams);
-        expect(response).to.have.status(401);
-        return chakram.wait();
+        chakram.get(syncMetadataLocalUrl + data.version, env.improperRequestParams)
+        .then(function (response) {
+            expect(response).to.have.status(401);
+            return chakram.wait();
+        });
     });
 });
 
 describe("metadata sync API  when remote server is not configured on local", function () {
     it("should give a 500 error", function () {
+        chakram.startDebug();
         var response = chakram.get(syncMetadataLocalUrl + data.version, env.properRequestParams);
         expect(response).to.have.status(500);
         expect(response).to.have.json(data.remoteServerNotConfigured);
@@ -26,14 +29,18 @@ describe("metadata sync API  when remote server is not configured on local", fun
 });
 
 describe("metadata sync API  when remote server details are incorrect", function () {
+    var setup;
     before("setting invalid username and password for HQ server details on local", function () {
-        return chakram.post(systemSettingsUrl, data.invalidServerDetails, env.properRequestParams)
+        setup = chakram.post(systemSettingsUrl, data.invalidServerDetails, env.properRequestParams);
+        return chakram.wait();
     });
     it("should give a 500 error, authentication failed", function () {
+        setup.then(function () {
         var response = chakram.get(syncMetadataLocalUrl + data.version, env.properRequestParams);
         expect(response).to.have.status(500);
         expect(response).to.have.json(data.serverAuthenticationFailed);
         return chakram.wait();
+    });
     });
 });
 
