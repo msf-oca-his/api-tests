@@ -9,6 +9,7 @@ mocha.addFile('modules/metadataversion/GetVersionDataTest.js');
 mocha.addFile('modules/metadataversion/GetVersionDatagzTest.js');
 mocha.addFile('modules/metadataversion/MetadataVersionsUserAuthTest.js');
 mocha.addFile('modules/metadataversion/UnsupportedCallsTest.js');
+mocha.addFile('modules/metadatasync/contract/SyncContractTest.js');
 mocha.run(function(failures){
 	process.on('exit', function () {
 		process.exit(failures);
