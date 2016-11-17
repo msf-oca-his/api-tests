@@ -20,10 +20,14 @@ describe("metadata sync API  when there is no proper authorization", function ()
 
 describe("metadata sync API  when remote server is not configured on local", function () {
     it("should give a 500 error", function () {
-        var response = chakram.get(syncMetadataLocalUrl + data.version, env.properRequestParams);
+        chakram.startDebug();
+        chakram.get(syncMetadataLocalUrl + data.version, env.properRequestParams)
+        .then(function (response) {
         expect(response).to.have.status(500);
         expect(response).to.have.json(data.remoteServerNotConfigured);
+            chakram.stopDebug();
         return chakram.wait();
+    });
     });
 });
 
