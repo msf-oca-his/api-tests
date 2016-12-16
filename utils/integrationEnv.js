@@ -4,10 +4,10 @@ var hqURL = process.env.DHIS_HQURL,
     localport = process.env.DHIS_LOCALPORT;
 
 if (typeof hqURL == 'undefined' || !hqURL) {
-    hqURL = 'msfocauatlocal.twhosted.com'
+    hqURL = 'localhost'
 }
 if (typeof hqport == 'undefined' || !hqport) {
-    hqport = 8080
+    hqport = 8085
 }
 if (typeof localURL == 'undefined' || !localURL) {
     localURL = 'localhost'
@@ -19,7 +19,7 @@ module.exports = {
     hqUrl: "http://" + hqURL + ":" + hqport,
     localUrl: "http://" + localURL + ":" + localport,
     api: "/api/",
-    version: "",
+    version: "25/",
     properRequestParams: {
         headers: {
             'Content-Type': 'application/json',

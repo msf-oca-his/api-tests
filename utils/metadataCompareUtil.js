@@ -8,20 +8,27 @@ var chakram    = require('chakram'),
     hqUrl      = env.hqUrl + env.api + env.version,
     run        = process.env.run;
 
-var parseJsonData = function(entityJson) {
-	delete(entityJson.lastUpdated);
-	delete(entityJson.href);
-	delete(entityJson.created);
-	delete(entityJson.lastLogin);
-	delete(entityJson.user);
-	return entityJson;
+var parseJsonData = function(entitysJson, entityName) {
+	return _.map(entitysJson[entityName], function(entityJson){
+		delete(entityJson.lastUpdated);
+		delete(entityJson.href);
+		delete(entityJson.created);
+		delete(entityJson.lastLogin);
+		delete(entityJson.user);
+		if(entityName == 'users'){
+			delete(entityJson.userCredentials.lastUpdated);
+			delete(entityJson.userCredentials.lastLogin);
+		}
+		return entityJson;
+	});
+
 };
 
-this.compareMetadataEntity = function(entities, entityName) {
-	var promise = _.map(entities, function(entity) {
-		console.log(" comparing " + entityName + " of local with HQ");
+this.compareMetadataEntity = function(filterParam, entityName) {
+
+	// console.log(" comparing " + entityName + " of local with HQ");
 		if(run == "withDB") {
-			var localDataUrl = localUrl + "/" + entityName + "/" + entity.id + ".json?fields=";
+			var localDataUrl = localUrl + "/" + entityName + "/" + element.id + ".json?fields=";
 			_.map(entity, function(k, v) {
 				localDataUrl = localDataUrl + v + ",";
 			});
@@ -33,14 +40,15 @@ this.compareMetadataEntity = function(entities, entityName) {
 				});
 		}
 		else {
-			return Promise.all([chakram.get(hqUrl + "/" + entityName + "/" + entity.id, env.properRequestParams), chakram.get(localUrl + "/" + entityName + "/" + entity.id, env.properRequestParams)])
+			return Promise.all([chakram.get(hqUrl + entityName + "?filter=" + filterParam +"&fields=:all&paging=false", env.properRequestParams), chakram.get(localUrl + entityName + "?filter=" + filterParam +"&fields=:all&paging=false", env.properRequestParams)])
 				.then(function(responses) {
-					var hqData = parseJsonData(responses[0].body);
-					var localData = parseJsonData(responses[1].body);
-					console.log(" comparing " + entityName + "/" + entity.id + " of local with HQ");
+					console.log(entityName,"thisisithen")
+					var hqData = parseJsonData(responses[0].body, entityName);
+					var localData = parseJsonData(responses[1].body, entityName);
 					expect(hqData).to.deep.equal(localData);
+				})
+				.catch(function(err) {
+					throw new Error(err);
 				});
 		}
-	});
-	return Promise.all(promise);
 };
