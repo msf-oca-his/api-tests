@@ -23,32 +23,32 @@ console.log(run);
 
 describe("metadata sync API ", function() {
 	var setupData, syncSetUp, locResponse;
-	// before("creating versions on HQ after importing json", function() {
-	// 	chakram.post(localUrl + "systemSettings", serverData.validServerDetails, env.properRequestParams);
-	// 	if(run != "withDB")
-	// 		return chakram.post(importHqURL, data.body, env.properRequestParams)
-	// 			.then(function(chakramResponse) {
-	// 				console.log("itsdone")
-	// 				return chakramResponse.body;
-	// 			})
-	// 			.then(function() {
-	// 				return chakram.post(createVersionURL + data.type, {}, env.properRequestParams)
-	// 					.then(function(data) {
-	// 						console.log("version created ....itsdone")
-	// 						setupData = data;
-	// 					});
-	// 			});
-	// });
+	before("creating versions on HQ after importing json", function() {
+		chakram.post(localUrl + "systemSettings", serverData.validServerDetails, env.properRequestParams);
+		if(run != "withDB")
+			return chakram.post(importHqURL, data.body, env.properRequestParams)
+				.then(function(chakramResponse) {
+					console.log("itsdone")
+					return chakramResponse.body;
+				})
+				.then(function() {
+					return chakram.post(createVersionURL + data.type, {}, env.properRequestParams)
+						.then(function(data) {
+							console.log("version created ....itsdone")
+							setupData = data;
+						});
+				});
+	});
 
 
-	xit("should sync version from HQ to local", function() {
+	it("should sync version from HQ to local", function() {
 		locResponse = chakram.get(syncMetadataLocalUrl + version, env.properRequestParams);
 		console.log("dowlonaded to local ....itsdone")
 		expect(locResponse).to.have.status(200);
 		return chakram.wait();
 	});
 
-	xit("should get version data same as in hq after metadata sync", function() {
+	it("should get version data same as in hq after metadata sync", function() {
 		var hQData;
 		String.prototype.hashCode = function() {
 			var hash = 0, i, chr, len;
