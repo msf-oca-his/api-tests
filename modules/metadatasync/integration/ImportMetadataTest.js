@@ -128,8 +128,6 @@ describe("metadata sync API ", function() {
 				}
 				else {
 					_.reduce(entities, function(result, entityName, index) {
-						if(index == 6 ||index == 13 ||index == 14  ||index == 18 ||index == 21 ||index==19 || index == 22)
-							return;
 						return Promise.resolve(result)
 							.then(function() {
 								return testEntity(body, entityName);
