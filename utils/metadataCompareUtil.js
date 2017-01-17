@@ -14,6 +14,7 @@ var parseJsonData = function(entitysJson, entityName) {
 		delete(entityJson.href);
 		delete(entityJson.created);
 		delete(entityJson.lastLogin);
+		delete (entityJson.translations);
 		delete(entityJson.user);
 		if(entityName == 'users') {
 			delete(entityJson.userCredentials.lastUpdated);
@@ -34,27 +35,28 @@ var getSchema = function(entityName) {
 			});
 			_.map(entitySchema.properties, function(prop) {
 				if(prop.propertyType == 'COLLECTION')
-					schema.push({fieldName: prop.fieldName, propertyType: 'COLLECTION'})
-				else if(prop.propertyType == 'COMPLEX')
-					schema.push({fieldName: prop.fieldName, propertyType: 'COMPLEX'})
-				else if(prop.propertyType == 'REFERENCE')
-					schema.push({fieldName: prop.fieldName, propertyType: 'REFERENCE'})
+					schema.push({fieldName: prop.fieldName, propertyType: 'COLLECTION'});
 				else
-					schema.push({fieldName: prop.fieldName, propertyType: 'SIMPLE'})
+					schema.push({fieldName: prop.fieldName, propertyType: 'NON COLLECTION'})
 			});
 			return schema;
 		});
 };
 
-var sortData = function(data, config) {
-	var sortedData = {};
-	_.map(data, function(v, k) {
-		for(var i = 0; i < config.length; i++) {
-			if(config[i].fieldName == k && config[i].propertyType == 'COLLECTION')
-				sortedData[k] = _.sortBy(v, "id");
-			if(config[i].fieldName == k && config[i].propertyType != 'COLLECTION')
-				sortedData[k] = v
-		}
+var sortData = function(unsortedData, config) {
+	var sortedData = [];
+	var firstLevelSortedData = _.sortBy(unsortedData,"id");
+	_.map(firstLevelSortedData, function(unsortedEntity) {
+		var sortedEntity = {};
+		_.map(unsortedEntity, function(v, k) {
+			for(var i = 0; i < config.length; i++) {
+				if(config[i].fieldName == k && config[i].propertyType == 'COLLECTION')
+					sortedEntity[k] = _.sortBy(v, "id");
+				if(config[i].fieldName == k && config[i].propertyType != 'COLLECTION')
+					sortedEntity[k] = v
+			}
+		});
+		sortedData.push(sortedEntity);
 	});
 	return sortedData;
 };
@@ -79,14 +81,8 @@ this.compareMetadataEntity = function(filterParam, entityName) {
 				.then(function(responses) {
 					var hqData = parseJsonData(responses[0].body, entityName);
 					var localData = parseJsonData(responses[1].body, entityName);
-					var sortedHqData = [];
-					var sortedLocalData = [];
-					_.map(hqData, function(entity) {
-						sortedHqData.push(sortData(entity, config))
-					});
-					_.map(localData, function(entity) {
-						sortedLocalData.push(sortData(entity, config));
-					});
+					var sortedHqData = sortData(hqData,config);
+					var sortedLocalData = sortData(localData,config);
 					expect(sortedHqData).to.deep.equal(sortedLocalData);
 				})
 				.catch(function(err) {

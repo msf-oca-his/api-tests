@@ -7,13 +7,13 @@ if (typeof hqURL == 'undefined' || !hqURL) {
     hqURL = 'localhost'
 }
 if (typeof hqport == 'undefined' || !hqport) {
-    hqport = 8085
+    hqport = 8080
 }
 if (typeof localURL == 'undefined' || !localURL) {
     localURL = 'localhost'
 }
 if (typeof localport == 'undefined' || !localport) {
-    localport = 8080
+    localport = 8085
 }
 module.exports = {
     hqUrl: "http://" + hqURL + ":" + hqport,
