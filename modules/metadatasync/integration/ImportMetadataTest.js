@@ -135,7 +135,7 @@ describe("metadata sync API ", function() {
 							.catch(bigrej)
 					}).then(bigres)
 				}
-		});
+		}).catch(bigrej);
 		return bigPromise;
 	})
 });
