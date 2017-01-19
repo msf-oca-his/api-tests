@@ -27,12 +27,10 @@ var parseJsonData = function(entitysJson, entityName) {
 
 var getSchema = function(entityName) {
 	var schema = [];
-	var schemaUrl = hqUrl + "schemas.json";
+	var subEntityName = entityName.substring(0,entityName.length);
+	var schemaUrl = hqUrl + "schemas/"+subEntityName+".json";
 	return chakram.get(schemaUrl, env.properRequestParams)
-		.then(function(response) {
-			var entitySchema = _.find(response.body.schemas, function(obj) {
-				return obj.collectionName == entityName;
-			});
+		.then(function(entitySchema) {
 			_.map(entitySchema.properties, function(prop) {
 				if(prop.propertyType == 'COLLECTION')
 					schema.push({fieldName: prop.fieldName, propertyType: 'COLLECTION'});
