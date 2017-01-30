@@ -2,7 +2,6 @@ var chakram                = require('chakram'),
     _                      = require('lodash'),
     expect                 = chakram.expect,
     chai                   = require('chai'),
-    chaiexpect             = chai.expect,
     env                    = require('../../../utils/integrationEnv'),
     localUrl               = env.localUrl + env.api + env.version,
     hqUrl                  = env.hqUrl + env.api + env.version,
@@ -15,9 +14,9 @@ var chakram                = require('chakram'),
     version                = process.env.version,
     run                    = process.env.run,
     data                   = require('../../../data/metadatasync/versiondata/' + version),
-	serverData = require('../../../data/metadatasync/ContractTestData'),
-	metadataCompareUtil    = require('../../../utils/metadataCompareUtil');
-
+    serverData             = require('../../../data/metadatasync/ContractTestData'),
+    compareUtil            = require('../../../utils/compareUtil'),
+    utils                  = require('../../../utils/utils');
 console.log(version);
 console.log(run);
 
@@ -40,7 +39,6 @@ describe("metadata sync API ", function() {
 				});
 	});
 
-
 	it("should sync version from HQ to local", function() {
 		locResponse = chakram.get(syncMetadataLocalUrl + version, env.properRequestParams);
 		console.log("dowlonaded to local ....itsdone")
@@ -50,16 +48,6 @@ describe("metadata sync API ", function() {
 
 	it("should get version data same as in hq after metadata sync", function() {
 		var hQData;
-		String.prototype.hashCode = function() {
-			var hash = 0, i, chr, len;
-			if (this.length === 0) return hash;
-			for (i = 0, len = this.length; i < len; i++) {
-				chr   = this.charCodeAt(i);
-				hash  = ((hash << 5) - hash) + chr;
-				hash |= 0; // Convert to 32bit integer
-			}
-			return hash;
-		};
 		return chakram.get(getVersionDataHqURL + version + "/data", env.properRequestParams)
 			.then(function(res) {
 				expect(res).to.have.status(200);
@@ -68,75 +56,26 @@ describe("metadata sync API ", function() {
 			})
 			.then(function(localData) {
 				expect(localData).to.have.status(200);
-				var k = JSON.stringify(localData.body);
-				var l = JSON.stringify(hQData);
-				console.log(k.hashCode(), l.hashCode());
-				expect(k.hashCode()).to.equal(l.hashCode());
+				var local = JSON.stringify(localData.body);
+				var hq = JSON.stringify(hQData);
+				var localDataHashCode = utils.hashCode(local);
+				var hqDataHashCode = utils.hashCode(hq);
+				expect(localDataHashCode).to.equal(hqDataHashCode);
 			});
 	});
 
-	it('test test',function() {
-		var bigres, bigrej;
-		var bigPromise = new Promise(function(res, rej){
-			bigres =res;
-			bigrej = rej;
+	it('test test', function() {
+		var resolve, reject;
+		var outerPromise = new Promise(function(res, rej) {
+			resolve = res;
+			reject = rej;
 		});
-		Promise.all([chakram.get(getVersionDataHqURL + version + "/data", env.properRequestParams)])
-			.then(function(response) {
-				chaiexpect(response[0].response.statusCode).to.equal(200);
-				var body = response[0].body;
-				var entities = Object.keys(body);
-				entities.shift();
-				function testEntity(allEntitiesContent, entityName) {
-					var res, rej;
-					var a = new Promise(function(resolve, reject) {
-						res = resolve;
-						rej = reject;
-					});
-					var i = 0;
-					var tests;
-					tests = allEntitiesContent[entityName];
-
-
-					function executeTestCasesNdUpdateTimenScheduleYourself() {
-						if(i >= tests.length) {
-							res();
-							return;
-						}
-						 console.log('batch running...', i, tests.length);
-						var filterParam = 'id:in:['
-						var k;
-						for(k = 0; (k < 50) && (i < tests.length); k++, i++) {
-							filterParam = filterParam + tests[i].id + ","
-						}
-						filterParam = filterParam + ']';
-						console.log(filterParam,"filterparam")
-						return metadataCompareUtil.compareMetadataEntity(filterParam, entityName)
-							.then(function() {
-								setTimeout(executeTestCasesNdUpdateTimenScheduleYourself, 30);
-							})
-							.catch(rej);
-					}
-					setTimeout(executeTestCasesNdUpdateTimenScheduleYourself, 30);
-					return a;
-				}
-
-				if(entities.length == 1) {
-					return testEntity(body,entities[22])
-						.then(bigres)
-						.catch(bigrej);
-				}
-				else {
-					_.reduce(entities, function(result, entityName, index) {
-						return Promise.resolve(result)
-							.then(function() {
-								return testEntity(body, entityName);
-							})
-							.catch(bigrej)
-					}).then(bigres)
-				}
-		}).catch(bigrej);
-		return bigPromise;
+		Promise.all([chakram.get(getVersionDataHqURL + version + "/data", env.properRequestParams), chakram.get(hqUrl + "schemas.json?fields=plural,singular", env.properRequestParams)])
+			.then(function(responses) {
+				var entitySchemaNames = responses[1].body.schemas;
+				return compareUtil.compareAllEntities(responses[0], entitySchemaNames, resolve, reject);
+			}).catch(reject);
+		return outerPromise;
 	})
 });
 
