@@ -66,7 +66,7 @@ describe("metadata sync API ", function() {
 
 	it('should compare each entity data after metadata sync', function() {
 		var onSuccess, onFailure;
-		var waitForAllEntitiesToBeCompared = new Promise(function(resolve,reject) {//TODO: rename all of this and make it look like a part of test
+		var waitForAllEntitiesToBeCompared = new Promise(function(resolve,reject) {
 			onSuccess = resolve;
 			onFailure = reject;
 		});

@@ -41,11 +41,14 @@ var compareEachEntity = function(metadataVersionData, pluralEntityName, singular
 };
 
 var getSingluarPluralNamesOfEntity = function(schemaOfEntities, metadataEntity) {
-	return _.first(_.filter(schemaOfEntities, {plural: 'dataElements'}));
+	return _.first(_.filter(schemaOfEntities, {plural: metadataEntity}));
 };
 
 this.compareAllEntities = function(metadataVersionData, schemaOfEntities, onSuccess, onFailure) {
-	var metadataEntities = _.omit(Object.keys(metadataVersionData),['system']);
+	var metadataEntities = _(metadataVersionData)
+													.keys()
+													.pull('system')
+													.value();
 	if(metadataEntities.length == 1) {
 		var singularPluralNamesOfEntity = getSingluarPluralNamesOfEntity(schemaOfEntities, metadataEntities[0]);
 		return compareEachEntity(metadataVersionData, singularPluralNamesOfEntity.plural, singularPluralNamesOfEntity.singular)
