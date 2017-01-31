@@ -29,6 +29,7 @@ var compareEachEntity = function(metadataVersionData, pluralEntityName, singular
 		var filterParam = 'id:in:[';
 		var index;
 		filterParam = getFilterParamForNext50Ids(currentIndex, filterParam);
+		console.log("filter param"+ filterParam)
 		currentIndex = currentIndex + 50;
 		return handleMetadataEntity.handle(filterParam, pluralEntityName, singularEntityName)
 			.then(function() {
