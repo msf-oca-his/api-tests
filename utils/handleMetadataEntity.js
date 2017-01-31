@@ -82,42 +82,42 @@ var handleGreyedFields = function(hqData, localData) {
 	return compareComplexObjects(hqData, localData, complexKeys.GREYEDFIELDS);
 };
 
-var handleNormalEntities = function(hqData, localData, entitySchema, pluralEntityName) {
-	var removeUnnecessaryKeys = function(data) {
-		return _.map(data, function(entityJson) {
+var handleNormalEntities = function(hqData, localData, metadataEntity, pluralEntityName) {
+	var removeUnnecessaryKeys = function(metadataVersionData) {
+		return _.map(metadataVersionData, function(metadataEntityData) {
 			if(pluralEntityName == 'users') {
-				delete(entityJson.userCredentials.lastUpdated);
-				delete(entityJson.userCredentials.lastLogin);
+				delete(metadataEntityData.userCredentials.lastUpdated);
+				delete(metadataEntityData.userCredentials.lastLogin);
 			}
-			return _(entityJson)
+			return _(metadataEntityData)
 				.omit(unnecessaryKeys)
 				.omit(_.values(complexKeys))
 				.value();
 		});
 	};
 
-	var sortData = function(filteredData) {
-		
+	var sortMetadataVersionData = function(filteredMetadataVersionData) {
+
 		function sortEachProperty(value, key) {
-			if(entitySchema[key] == undefined) return;
-			if(entitySchema[key].propertyType == 'COLLECTION')
+			if(metadataEntity[key] == undefined) return;
+			if(metadataEntity[key].propertyType == 'COLLECTION')
 				return _.sortBy(value, 'id');
 			else
 				return value;
 		};
 
-		function sortEntity(unsortedEntity) {
-			return _.map(unsortedEntity, sortEachProperty);
+		function sortMetadataEntity(unsortedMetadataEntity) {
+			return _.map(unsortedMetadataEntity, sortEachProperty);
 		}
 
-		return _(filteredData)
+		return _(filteredMetadataVersionData)
 			.sortBy("id")
-			.map(sortEntity)
+			.map(sortMetadataEntity)
 			.value();
 	};
 
-	function prepareDataForComparision(data) {
-		return sortData(removeUnnecessaryKeys(data));
+	function prepareDataForComparision(metadataVersionData) {
+		return sortMetadataVersionData(removeUnnecessaryKeys(metadataVersionData));
 	}
 
 	return expect(prepareDataForComparision(hqData)).to.deep.equal(prepareDataForComparision(localData));
@@ -135,8 +135,8 @@ this.handle = function(filterParam, pluralEntityName, singularEntityName) {
 		.then(function(responses) {
 			var hqData = responses[0];
 			var localData = responses[1];
-			var entitySchema = responses[2];
-			handleNormalEntities(hqData, localData, entitySchema, pluralEntityName);
+			var metadataEntity = responses[2];
+			handleNormalEntities(hqData, localData, metadataEntity, pluralEntityName);
 			handleTranslations(hqData, localData);
 			handleDataDimensionItems(hqData, localData);
 			handleAttributeValues(hqData, localData);

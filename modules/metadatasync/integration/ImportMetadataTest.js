@@ -22,31 +22,31 @@ console.log(run);
 
 describe("metadata sync API ", function() {
 	var setupData, syncSetUp, locResponse;
-	before("creating versions on HQ after importing json", function() {
-		chakram.post(localUrl + "systemSettings", serverData.validServerDetails, env.properRequestParams);
-		if(run != "withDB")
-			return chakram.post(importHqURL, data.body, env.properRequestParams)
-				.then(function(chakramResponse) {
-					console.log("itsdone")
-					return chakramResponse.body;
-				})
-				.then(function() {
-					return chakram.post(createVersionURL + data.type, {}, env.properRequestParams)
-						.then(function(data) {
-							console.log("version created ....itsdone")
-							setupData = data;
-						});
-				});
-	});
+	// before("creating versions on HQ after importing json", function() {
+	// 	chakram.post(localUrl + "systemSettings", serverData.validServerDetails, env.properRequestParams);
+	// 	if(run != "withDB")
+	// 		return chakram.post(importHqURL, data.body, env.properRequestParams)
+	// 			.then(function(chakramResponse) {
+	// 				console.log("itsdone")
+	// 				return chakramResponse.body;
+	// 			})
+	// 			.then(function() {
+	// 				return chakram.post(createVersionURL + data.type, {}, env.properRequestParams)
+	// 					.then(function(data) {
+	// 						console.log("version created ....itsdone")
+	// 						setupData = data;
+	// 					});
+	// 			});
+	// });
 
-	it("should sync version from HQ to local", function() {
+	xit("should sync version from HQ to local", function() {
 		locResponse = chakram.get(syncMetadataLocalUrl + version, env.properRequestParams);
 		console.log("dowlonaded to local ....itsdone")
 		expect(locResponse).to.have.status(200);
 		return chakram.wait();
 	});
 
-	it("should get version data same as in hq after metadata sync", function() {
+	xit("should get version data same as in hq after metadata sync", function() {
 		var hQData;
 		return chakram.get(getVersionDataHqURL + version + "/data", env.properRequestParams)
 			.then(function(res) {
@@ -65,17 +65,18 @@ describe("metadata sync API ", function() {
 	});
 
 	it('should compare each entity data after metadata sync', function() {
-		var resolve, reject;
-		var outerPromise = new Promise(function(res, rej) {
-			resolve = res;
-			reject = rej;
+		var onSuccess, onFailure;
+		var waitForAllEntitiesToBeCompared = new Promise(function(resolve,reject) {//TODO: rename all of this and make it look like a part of test
+			onSuccess = resolve;
+			onFailure = reject;
 		});
 		Promise.all([chakram.get(getVersionDataHqURL + version + "/data", env.properRequestParams), chakram.get(hqUrl + "schemas.json?fields=plural,singular", env.properRequestParams)])
 			.then(function(responses) {
-				var entitySchemaNames = responses[1].body.schemas;
-				return compareUtil.compareAllEntities(responses[0], entitySchemaNames, resolve, reject);
-			}).catch(reject);
-		return outerPromise;
+				var schemaOfEntities = responses[1].body.schemas;
+				var metadataVersionData = responses[0].body;
+				return compareUtil.compareAllEntities(metadataVersionData, schemaOfEntities, onSuccess, onFailure);
+			}).catch(onFailure);
+		return waitForAllEntitiesToBeCompared;
 	})
 });
 
