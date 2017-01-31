@@ -1,7 +1,6 @@
 var chakram              = require('chakram'),
     _                    = require('lodash'),
     chai                 = require('chai'),
-    chaiexpect           = chai.expect,
     handleMetadataEntity = require('./handleMetadataEntity');
 
 var compareEachEntity = function(allEntitiesContent, pluralEntityName, singularEntityName) {
@@ -13,6 +12,14 @@ var compareEachEntity = function(allEntitiesContent, pluralEntityName, singularE
 	var currentIndex = 0;
 	var tests = allEntitiesContent[pluralEntityName];
 
+	function getFilterParamForNext50Ids(currentIndex, filterParam) {
+		for(var index = 0; (index < 50) && (currentIndex < tests.length); index++, currentIndex++) {
+			filterParam = filterParam + tests[currentIndex].id + ","
+		}
+		filterParam = filterParam + ']';
+		return filterParam
+	}
+
 	function executeBatchWiseTests() {
 		if(currentIndex >= tests.length) {
 			resolve();
@@ -21,10 +28,8 @@ var compareEachEntity = function(allEntitiesContent, pluralEntityName, singularE
 		console.log('batch running...', currentIndex, tests.length);
 		var filterParam = 'id:in:[';
 		var index;
-		for(index = 0; (index < 50) && (currentIndex < tests.length); index++, currentIndex++) {
-			filterParam = filterParam + tests[currentIndex].id + ","
-		}
-		filterParam = filterParam + ']';
+		filterParam = getFilterParamForNext50Ids(currentIndex, filterParam);
+		currentIndex = currentIndex + 50;
 		return handleMetadataEntity.handle(filterParam, pluralEntityName, singularEntityName)
 			.then(function() {
 				setTimeout(executeBatchWiseTests, 30);
@@ -42,7 +47,6 @@ var getEntitySchemaNames = function(entitySchemaNames, entityName) {
 };
 
 this.compareAllEntities = function(response, entitySchemaNames, resolve, reject) {
-	chaiexpect(response.response.statusCode).to.equal(200);
 	var body = response.body;
 	var entities = Object.keys(body);
 	var filteredEntities = _.omit(entities, ["system"]);

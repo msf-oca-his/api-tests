@@ -16,156 +16,133 @@ var complexKeys = {
 var unnecessaryKeys = ["lastUpdated", "href", "created", "lastLogin", "user", 'publicAccess'];
 
 var getSchema = function(entityName) {
-	var schema = [];
-	var schemaUrl = localUrl + "schemas/" + entityName + ".json";
+	var schema = {};
+	var schemaUrl = localUrl + "schemas/" + entityName + ".json?fields=properties[fieldName,propertyType,collectionName]";
 	return chakram.get(schemaUrl, env.properRequestParams)
-		.then(function(entitySchema) {
-			_.map(entitySchema.body.properties, function(prop) {
+		.then(function(response) {
+			_.map(response.body.properties, function(prop) {
 				if(prop.propertyType == 'COLLECTION')
-					schema.push({fieldName: prop.collectionName, propertyType: 'COLLECTION'});
+					schema[prop.collectionName] = prop;
 				else
-					schema.push({fieldName: prop.fieldName, propertyType: 'NON COLLECTION'})
+					schema[prop.fieldName] = prop;
 			});
 			return schema;
 		});
 };
 
-var parseJsonData = function(data, entityName) {
-	return _.map(data, function(entityJson) {
-		var parsedEntityJson = _(entityJson)
-			.omit(entityJson, unnecessaryKeys)
-			.omit(entityJson, _.values(complexKeys))
-			.value();
-		if(entityName == 'users') {
-			delete(parsedEntityJson.userCredentials.lastUpdated);
-			delete(parsedEntityJson.userCredentials.lastLogin);
-		}
-		return parsedEntityJson;
-	});
-};
-
-var sortData = function(unsortedData, entitySchema) {
-	var sortedData = [];
-	var firstLevelSortedData = _.sortBy(unsortedData, "id");
-	_.map(firstLevelSortedData, function(unsortedEntity) {
-		var sortedEntity = {};
-		_.map(unsortedEntity, function(value, key) {
-			var collectionEntity = _.filter(entitySchema, function(schemaObj) {
-				return schemaObj.fieldName == key && schemaObj.propertyType == 'COLLECTION'
-			});
-			var nonCollectionEntity = _.filter(entitySchema, function(schemaObj) {
-				return schemaObj.fieldName == key && schemaObj.propertyType != 'COLLECTION'
-			});
-			if(!(_.isEmpty(collectionEntity))) sortedEntity[key] = _.sortBy(value, "id");
-			if(!(_.isEmpty(nonCollectionEntity))) sortedEntity[key] = value;
-		});
-		sortedData.push(sortedEntity);
-	});
-	return sortedData;
-};
-
 var byHashCodeImpl = function(listOfObjects) {
-	var hashCodes = [];
-	_.map(listOfObjects, function(object) {
-		_.map(object, function(prop) {
-			if(prop.constructor.name == 'Array')
-				_.map(prop, function(obj) {
-					hashCodes.push(utils.hashCode(JSON.stringify(obj)));
-				});
+	function generateHashCodeForEachProperty(object) {
+		function getHashCodesOfEachObjectInArray(array) {
+			return _(array)
+				.map(JSON.stringify)
+				.map(utils.hashCode)
+				.value()
+		}
+
+		return _.map(object, function(property) {
+			if(property.constructor.name == 'Array')
+				return getHashCodesOfEachObjectInArray(property);
 			else
-				hashCodes.push(utils.hashCode(JSON.stringify(prop)));
+				return utils.hashCode(JSON.stringify(property));
 		})
+	}
+	return _.map(listOfObjects, generateHashCodeForEachProperty);
+};
+
+var getPropertyData = function(data, key) {
+	return _.map(data, function(entity) {
+		return _.pick(entity, key);
 	});
-	return hashCodes;
 };
 
-var getPropertyData = function(data, prop) {
-	var propertyData = [];
-	_.map(data, function(entity) {
-		var propData = _.pick(entity, prop);
-		propertyData.push(propData);
-	});
-	return propertyData;
+var getDataByKey = function(data, key) {
+	var data = getPropertyData(data, key);
+	return _.sortBy(_.flattenDeep(byHashCodeImpl(data)));
 };
 
-var getTranslationData = function(data) {
-
-	var allTranslationsData = getPropertyData(data, complexKeys.TRANSLATIONS);
-
-	return _.sortBy(byHashCodeImpl(allTranslationsData));
-
-};
-
-var getDataDimensionItemsData = function(data) {
-
-	var allDataDimensionItems = getPropertyData(data, complexKeys.DATADIMENSIONITEMS);
-
-	return _.sortBy(byHashCodeImpl(allDataDimensionItems))
-};
-
-var getAttributeValuesData = function(data) {
-
-	var allAttributeValues = getPropertyData(data, complexKeys.ATTRIBUTEVALUES);
-
-	return _.sortBy(byHashCodeImpl(allAttributeValues));
-};
-
-var getGreyedFieldsData = function(data) {
-
-	var allGreyedFields = getPropertyData(data, complexKeys.GREYEDFIELDS);
-
-	return _.sortBy(byHashCodeImpl(allGreyedFields));
+var compareComplexObjects = function(hqData, localData, key) {
+	var sortedHqData = getDataByKey(hqData, key);
+	var sortedLocalData = getDataByKey(localData, key);
+	expect(sortedHqData).to.deep.equal(sortedLocalData);
 };
 
 var handleTranslations = function(hqData, localData) {
-	var sortedHqData = getTranslationData(hqData);
-	var sortedLocalData = getTranslationData(localData);
-	expect(sortedHqData).to.deep.equal(sortedLocalData);
+	return compareComplexObjects(hqData, localData, complexKeys.TRANSLATIONS);
 };
 
 var handleDataDimensionItems = function(hqData, localData) {
-	var sortedHqData = getDataDimensionItemsData(hqData);
-	var sortedLocalData = getDataDimensionItemsData(localData);
-	expect(sortedHqData).to.deep.equal(sortedLocalData);
+	return compareComplexObjects(hqData, localData, complexKeys.DATADIMENSIONITEMS);
 };
 
 var handleAttributeValues = function(hqData, localData) {
-	var sortedHqData = getAttributeValuesData(hqData);
-	var sortedLocalData = getAttributeValuesData(localData);
-	expect(sortedHqData).to.deep.equal(sortedLocalData);
+	return compareComplexObjects(hqData, localData, complexKeys.ATTRIBUTEVALUES);
 };
 
 var handleGreyedFields = function(hqData, localData) {
-	var sortedHqData = getGreyedFieldsData(hqData);
-	var sortedLocalData = getGreyedFieldsData(localData);
-	expect(sortedHqData).to.deep.equal(sortedLocalData);
+	return compareComplexObjects(hqData, localData, complexKeys.GREYEDFIELDS);
 };
 
 var handleNormalEntities = function(hqData, localData, entitySchema, pluralEntityName) {
-	var parsedHqData = parseJsonData(hqData, pluralEntityName);
-	var parsedLocalData = parseJsonData(localData, pluralEntityName);
-	var sortedHqData = sortData(parsedHqData, entitySchema);
-	var sortedLocalData = sortData(parsedLocalData, entitySchema);
-	expect(sortedHqData).to.deep.equal(sortedLocalData);
+	var removeUnnecessaryKeys = function(data) {
+		return _.map(data, function(entityJson) {
+			if(pluralEntityName == 'users') {
+				delete(entityJson.userCredentials.lastUpdated);
+				delete(entityJson.userCredentials.lastLogin);
+			}
+			return _(entityJson)
+				.omit(unnecessaryKeys)
+				.omit(_.values(complexKeys))
+				.value();
+		});
+	};
+
+	var sortData = function(filteredData) {
+		
+		function sortEachProperty(value, key) {
+			if(entitySchema[key] == undefined) return;
+			if(entitySchema[key].propertyType == 'COLLECTION')
+				return _.sortBy(value, 'id');
+			else
+				return value;
+		};
+
+		function sortEntity(unsortedEntity) {
+			return _.map(unsortedEntity, sortEachProperty);
+		}
+
+		return _(filteredData)
+			.sortBy("id")
+			.map(sortEntity)
+			.value();
+	};
+
+	function prepareDataForComparision(data) {
+		return sortData(removeUnnecessaryKeys(data));
+	}
+
+	return expect(prepareDataForComparision(hqData)).to.deep.equal(prepareDataForComparision(localData));
 };
 
+function getDataFor(url, entityName, filterParam) {
+	return chakram.get(url + entityName + "?filter=" + filterParam + "&fields=:all&paging=false", env.properRequestParams)
+		.then(function(response) {
+			return response.body[entityName];
+		})
+}
 this.handle = function(filterParam, pluralEntityName, singularEntityName) {
 	console.log(" comparing " + pluralEntityName + " of local with HQ");
-	return getSchema(singularEntityName).then(function(entitySchema) {
-		return Promise.all([chakram.get(hqUrl + pluralEntityName + "?filter=" + filterParam + "&fields=:all&paging=false", env.properRequestParams), chakram.get(localUrl + pluralEntityName + "?filter=" + filterParam + "&fields=:all&paging=false", env.properRequestParams)])
-			.then(function(responses) {
-				var hqResponse = responses[0].body;
-				var localResponse = responses[1].body;
-				var hqData = hqResponse[pluralEntityName];
-				var localData = localResponse[pluralEntityName];
-				handleNormalEntities(hqData, localData, entitySchema, pluralEntityName);
-				handleTranslations(hqData, localData);
-				handleDataDimensionItems(hqData, localData);
-				handleAttributeValues(hqData, localData);
-				handleGreyedFields(hqData, localData)
-			})
-			.catch(function(err) {
-				throw new Error(err);
-			});
-	});
+	return Promise.all([getDataFor(hqUrl, pluralEntityName, filterParam), getDataFor(localUrl, pluralEntityName, filterParam), getSchema(singularEntityName)])
+		.then(function(responses) {
+			var hqData = responses[0];
+			var localData = responses[1];
+			var entitySchema = responses[2];
+			handleNormalEntities(hqData, localData, entitySchema, pluralEntityName);
+			handleTranslations(hqData, localData);
+			handleDataDimensionItems(hqData, localData);
+			handleAttributeValues(hqData, localData);
+			handleGreyedFields(hqData, localData)
+		})
+		.catch(function(err) {
+			throw new Error(err);
+		});
 };

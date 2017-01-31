@@ -64,7 +64,7 @@ describe("metadata sync API ", function() {
 			});
 	});
 
-	it('test test', function() {
+	it('should compare each entity data after metadata sync', function() {
 		var resolve, reject;
 		var outerPromise = new Promise(function(res, rej) {
 			resolve = res;
