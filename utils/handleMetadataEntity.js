@@ -30,23 +30,22 @@ var getSchema = function(entityName) {
 		});
 };
 
-var byHashCodeImpl = function(listOfObjects) {
-	function generateHashCodeForEachProperty(object) {
-		function getHashCodesOfEachObjectInArray(array) {
+var byJsonStringImpl = function(listOfObjects) {
+	function generateJsonStringForEachProperty(object) {
+		function generateJsonStringForEachObjectInArray(array) {
 			return _(array)
 				.map(JSON.stringify)
-				.map(utils.hashCode)
 				.value()
 		}
 
 		return _.map(object, function(property) {
 			if(property.constructor.name == 'Array')
-				return getHashCodesOfEachObjectInArray(property);
+				return generateJsonStringForEachObjectInArray(property);
 			else
-				return utils.hashCode(JSON.stringify(property));
+				return JSON.stringify(property);
 		})
 	}
-	return _.map(listOfObjects, generateHashCodeForEachProperty);
+	return _.map(listOfObjects, generateJsonStringForEachProperty);
 };
 
 var getPropertyData = function(data, key) {
@@ -57,7 +56,7 @@ var getPropertyData = function(data, key) {
 
 var getDataByKey = function(data, key) {
 	var data = getPropertyData(data, key);
-	return _.sortBy(_.flattenDeep(byHashCodeImpl(data)));
+	return _.flattenDeep(byJsonStringImpl(data)).sort();
 };
 
 var compareComplexObjects = function(hqData, localData, key) {
@@ -143,6 +142,7 @@ this.handle = function(filterParam, pluralEntityName, singularEntityName) {
 			handleGreyedFields(hqData, localData)
 		})
 		.catch(function(err) {
+			console.log(err,"failed");
 			throw new Error(err);
 		});
 };
